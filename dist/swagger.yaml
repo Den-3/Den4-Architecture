@@ -182,7 +182,7 @@ paths:
                       body: こんにちは！
                       memo:
                         - type: stamp
-                          data: 'http://example.'
+                          data: 'http://example.com/stamp1.jpg'
                       createdAt: 0
                       editedAt: 0
                       id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
