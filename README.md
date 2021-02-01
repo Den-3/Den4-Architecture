@@ -1,6 +1,8 @@
 # Den4-Architecture
 大学チャットアプリのREST API設計
 
+[![swagger](https://img.shields.io/badge/swagger-docs-brightgreen)](https://den-3.github.io/Den4-Architecture/dist/index.html)
+
 REST API どう作る?
 
 DBの機能とHTTPリクエストの対応
