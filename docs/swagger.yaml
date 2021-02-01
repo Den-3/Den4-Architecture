@@ -1,0 +1,633 @@
+openapi: 3.0.0
+info:
+  description: Den4 Chat Server REST API
+  contact:
+    email: bp20070@shibaura-it.ac.jp
+  title: Chat
+  version: '1.0'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /callback:
+    get:
+      summary: OpenID ログイン
+      tags:
+        - OpenID Connect
+        - login
+      responses:
+        '200':
+          description: ログイントークン
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+      operationId: get-callback
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: code
+          description: Authorization Code
+        - schema:
+            type: string
+          in: query
+          name: state
+          description: State parameter
+      description: OAuth2(OP)から発行された認可コードを受け取る
+  /account/logout:
+    post:
+      summary: ログアウト
+      operationId: post-account-logout
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: セッショントークン
+      description: チャットサーバーからログアウトする
+      tags:
+        - account
+  /account/status:
+    get:
+      summary: アカウント状態取得
+      tags:
+        - account
+      responses:
+        '200':
+          description: OK
+      operationId: get-account-status
+      description: 指定したアカウントのログイン状態を示す
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: アカウントID
+    parameters: []
+    put:
+      summary: アカウント状態変更
+      operationId: put-account-status-accountUUID
+      responses:
+        '200':
+          description: OK
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: セッショントークン
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: アカウントID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+            examples:
+              ONLINE:
+                value:
+                  status: online
+              OFFLINE:
+                value:
+                  status: offline
+              AFK:
+                value:
+                  status: afk
+              BUSY:
+                value:
+                  status: busy
+        description: 状態を指定するJSON
+      tags:
+        - channel
+      description: ログイン状態を更新する
+  /message:
+    parameters: []
+    post:
+      summary: メッセージ送信
+      operationId: post-message-account-accountUUID
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      description: メッセージを送信する
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: ログイントークン
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: target
+          description: 送信先ID (個人ID/ルームID)
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: server
+          description: 取得元 (サーバー)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                mention:
+                  type: array
+                  items:
+                    type: string
+      tags:
+        - message
+    get:
+      summary: メッセージ取得
+      operationId: get-message-account
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chat'
+              examples:
+                example-1:
+                  value:
+                    - author: 32ad2cdb-22a2-48aa-a42c-1c53a9afc4bd
+                      body: こんにちは！
+                      memo:
+                        - type: stamp
+                          data: 'http://example.'
+                      createdAt: 0
+                      editedAt: 0
+                      id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    - author: 3ggg2cdb-66a2-48aa-a99c-1c53lllfc4bd
+                      body: Hello World.
+                      memo:
+                        - {}
+                      createdAt: 0
+                      editedAt: 0
+                      id: 49555ca-6276-5000-uuub-53cbbbba6f08
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: offset
+          description: 最新から取得する先頭までの件数
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: count
+          description: 取得する件数
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: target
+          description: 取得元 (個人ID/ルームID)
+          required: true
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: ログイントークン
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: server
+          description: 取得元 (サーバー)
+      description: メッセージを取得する
+      tags:
+        - message
+    delete:
+      summary: メッセージ削除
+      operationId: delete-message
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      description: メッセージを削除する
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: ログイントークン
+        - schema:
+            type: string
+          in: query
+          name: target
+          description: 送信先ID (個人ID/ルームID)
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: メッセージID
+      tags:
+        - message
+    put:
+      summary: メッセージ更新
+      operationId: put-message
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: ログイントークン
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: target
+          description: 送信先ID (個人ID/ルームID)
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: server
+          description: サーバー
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                id:
+                  type: string
+      description: 送信したチャットを更新する
+      tags:
+        - message
+  /channel:
+    get:
+      summary: チャンネル情報取得
+      tags:
+        - channel
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatRoom'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      operationId: get-channel
+      description: チャンネル情報を取得する
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: ログイントークン
+    post:
+      summary: チャンネル作成
+      operationId: post-channel
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      description: チャンネルを作成する
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: ログイントークン
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      tags:
+        - channel
+    put:
+      summary: チャンネル更新
+      operationId: put-channel
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: ログイントークン
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: チャンネルID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                permission:
+                  type: array
+                  items:
+                    type: string
+                type:
+                  type: string
+            examples:
+              Voice Channnel:
+                value:
+                  name: テストボイスチャンネル
+                  permission:
+                    - tag1
+                    - tag3
+                  type: voice
+              Text Channnel:
+                value:
+                  name: string
+                  permission:
+                    - tag1
+                    - tag2
+                  type: text
+      description: チャンネルを更新する
+      tags:
+        - channel
+    delete:
+      summary: チャンネル削除
+      operationId: delete-channel
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      description: チャンネルを更新する
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: チャンネルID
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: ログイントークン
+      tags:
+        - channel
+  /server:
+    get:
+      summary: サーバー情報取得
+      tags:
+        - server
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Server'
+      operationId: get-server
+      description: サーバーの情報を取得する
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: サーバーID
+    post:
+      summary: サーバー登録
+      operationId: post-server
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      description: サーバーの情報を登録する
+      tags:
+        - server
+    put:
+      summary: サーバー情報更新
+      operationId: put-server
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      description: サーバーの情報を更新する
+      tags:
+        - server
+    delete:
+      summary: サーバー削除
+      operationId: delete-server
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: ログイントークン
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: サーバーID
+      description: サーバーを削除する
+      tags:
+        - server
+components:
+  schemas:
+    Chat:
+      title: Chat
+      type: object
+      description: チャット
+      x-examples:
+        example:
+          author: 32ad2cdb-22a2-48aa-a42c-1c53a9afc4bd
+          body: こんにちは！
+          memo:
+            - dataType: stamp
+              count: 2
+              data: 52ad2cdb-32j6-48aa-a42c-7c53d9afc4ld
+            - dataType: stamp
+              count: 0
+              data: 52ad2cdb-32j6-48aa-a42c-7c53d9afc4ld
+          createdAt: 0
+          editedAt: 0
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+      properties:
+        author:
+          type: string
+          description: 発信者
+        body:
+          type: string
+          description: メッセージ本文
+        memo:
+          description: 拡張領域
+          type: array
+          items:
+            type: object
+        createdAt:
+          type: number
+          description: 発信日時(UNIX TIME)
+        editedAt:
+          type: number
+          description: 編集日時 (UNIX TIME)
+        id:
+          type: string
+          description: メッセージID
+      required:
+        - author
+        - body
+        - memo
+        - createdAt
+        - editedAt
+        - id
+    Server:
+      title: Server
+      type: object
+      x-examples: {}
+      properties:
+        id:
+          type: string
+          format: uuid
+        room:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatRoom'
+        icon:
+          type: string
+          format: uri
+        invite:
+          type: array
+          items:
+            type: string
+            format: uri
+    ChatRoom:
+      title: ChatRoom
+      type: object
+      x-examples: {}
+      properties:
+        id:
+          type: string
+          format: uuid
+        serverID:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          default: text
+tags:
+  - name: account
+  - name: OpenID Connect
+  - name: login
+  - name: channel
+  - name: message
+  - name: server
