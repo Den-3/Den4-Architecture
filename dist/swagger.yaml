@@ -10,10 +10,7 @@ servers:
 paths:
   /callback:
     get:
-      summary: OpenID ログイン
-      tags:
-        - OpenID Connect
-        - login
+      summary: 認可コード受け取り
       responses:
         '200':
           description: ログイントークン
@@ -24,19 +21,29 @@ paths:
                 properties:
                   token:
                     type: string
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
       operationId: get-callback
       parameters:
         - schema:
             type: string
           in: query
           name: code
-          description: Authorization Code
+          description: Authorization code
         - schema:
             type: string
           in: query
           name: state
           description: State parameter
       description: OAuth2(OP)から発行された認可コードを受け取る
+      tags:
+        - account
   /account/logout:
     post:
       summary: ログアウト
@@ -44,8 +51,14 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
         '401':
           description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
       parameters:
         - schema:
             type: string
@@ -63,6 +76,14 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
       operationId: get-account-status
       description: 指定したアカウントのログイン状態を示す
       parameters:
@@ -111,9 +132,9 @@ paths:
                 value:
                   status: busy
         description: 状態を指定するJSON
-      tags:
-        - channel
       description: ログイン状態を更新する
+      tags:
+        - account
   /message:
     parameters: []
     post:
@@ -204,7 +225,7 @@ paths:
             type: integer
           in: query
           name: offset
-          description: 最新から取得する先頭までの件数
+          description: 最新のチャットから取得したいチャットの先頭までの件数
           required: true
         - schema:
             type: string
@@ -420,7 +441,7 @@ paths:
                   type: voice
               Text Channnel:
                 value:
-                  name: string
+                  name: テキストチャンネル1
                   permission:
                     - tag1
                     - tag2
@@ -470,6 +491,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Server'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
       operationId: get-server
       description: サーバーの情報を取得する
       parameters:
@@ -627,7 +656,6 @@ components:
 tags:
   - name: account
   - name: OpenID Connect
-  - name: login
   - name: channel
   - name: message
   - name: server
