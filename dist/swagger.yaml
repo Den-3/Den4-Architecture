@@ -43,7 +43,7 @@ paths:
           description: State parameter
       description: OAuth2(OP)から発行された認可コードを受け取る
       tags:
-        - account
+        - Account
   /account/logout:
     post:
       summary: ログアウト
@@ -67,12 +67,12 @@ paths:
           description: セッショントークン
       description: チャットサーバーからログアウトする
       tags:
-        - account
+        - Account
   /account/status:
     get:
       summary: アカウント状態取得
       tags:
-        - account
+        - Account
       responses:
         '200':
           description: OK
@@ -134,7 +134,7 @@ paths:
         description: 状態を指定するJSON
       description: ログイン状態を更新する
       tags:
-        - account
+        - Account
   /message:
     parameters: []
     post:
@@ -183,7 +183,7 @@ paths:
                   items:
                     type: string
       tags:
-        - message
+        - Message
     get:
       summary: メッセージ取得
       operationId: get-message-account
@@ -252,7 +252,7 @@ paths:
           description: 取得元 (サーバー)
       description: メッセージを取得する
       tags:
-        - message
+        - Message
     delete:
       summary: メッセージ削除
       operationId: delete-message
@@ -285,7 +285,7 @@ paths:
           name: id
           description: メッセージID
       tags:
-        - message
+        - Message
     put:
       summary: メッセージ更新
       operationId: put-message
@@ -330,12 +330,12 @@ paths:
                   type: string
       description: 送信したチャットを更新する
       tags:
-        - message
+        - Message
   /channel:
     get:
       summary: チャンネル情報取得
       tags:
-        - channel
+        - Channel
       responses:
         '200':
           description: OK
@@ -391,7 +391,7 @@ paths:
                 name:
                   type: string
       tags:
-        - channel
+        - Channel
     put:
       summary: チャンネル更新
       operationId: put-channel
@@ -448,7 +448,7 @@ paths:
                   type: text
       description: チャンネルを更新する
       tags:
-        - channel
+        - Channel
     delete:
       summary: チャンネル削除
       operationId: delete-channel
@@ -476,12 +476,12 @@ paths:
           name: Authorization
           description: ログイントークン
       tags:
-        - channel
+        - Channel
   /server:
     get:
       summary: サーバー情報取得
       tags:
-        - server
+        - Server
       responses:
         '200':
           description: OK
@@ -523,7 +523,7 @@ paths:
           description: Not Found
       description: サーバーの情報を登録する
       tags:
-        - server
+        - Server
     put:
       summary: サーバー情報更新
       operationId: put-server
@@ -540,7 +540,7 @@ paths:
           description: Not Found
       description: サーバーの情報を更新する
       tags:
-        - server
+        - Server
     delete:
       summary: サーバー削除
       operationId: delete-server
@@ -568,7 +568,7 @@ paths:
           description: サーバーID
       description: サーバーを削除する
       tags:
-        - server
+        - Server
 components:
   schemas:
     Chat:
@@ -654,8 +654,7 @@ components:
           type: string
           default: text
 tags:
-  - name: account
-  - name: OpenID Connect
-  - name: channel
-  - name: message
-  - name: server
+  - name: Account
+  - name: Channel
+  - name: Message
+  - name: Server
